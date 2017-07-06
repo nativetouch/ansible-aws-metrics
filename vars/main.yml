@@ -1,0 +1,19 @@
+---
+# vars file for metrics
+update_packages: false
+
+required_apt_packages:
+  - libwww-perl
+  - libdatetime-perl
+
+required_yum_packages:
+  - perl-libwww-perl
+  - perl-DateTime
+  - perl-Sys-Syslog
+  - perl-Crypt-SSLeay
+  - perl-LWP-Protocol-https
+
+aws_monitor_scripts_path: /usr/local/
+
+aws_metadata_scripts_path: /usr/bin/
+aws_metadata_scripts_url: https://s3.amazonaws.com/ec2metadata/ec2-metadata

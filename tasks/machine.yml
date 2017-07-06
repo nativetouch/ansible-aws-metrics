@@ -1,0 +1,32 @@
+---
+# machine-level setup for debian
+- name: update debian packages
+  apt: update_cache=yes
+  when: (update_packages == "true" and ansible_os_family == "Debian")
+  tags:
+    - machine
+
+- name: install required debian packages
+  apt: name={{ item }}
+  with_items: "{{ required_apt_packages }}"
+  when: ansible_os_family == "Debian"
+  tags:
+    - machine
+    - metrics # we want to install the required packages whenever we want to
+              # use metrics (to make sure we have the dependencies)
+
+# machine-level setup for redhat
+- name: upgrade all yum packages
+  yum: name=* state=latest update_cache=yes
+  when: (update_packages == "true" and ansible_os_family == "RedHat")
+  tags:
+    - machine
+
+- name: install required redhat packages
+  yum: name={{ item }} enablerepo=epel state=present update_cache=yes
+  with_items: "{{ required_yum_packages }}"
+  when: ansible_os_family == "RedHat"
+  tags:
+    - machine
+    - metrics # we want to install the required packages whenever we want to
+              # use metrics (to make sure we have the dependencies)

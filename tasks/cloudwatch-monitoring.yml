@@ -1,0 +1,84 @@
+---
+# cloudwatch-monitoring tasks
+
+# Add correct repo to source
+- name: update source list
+  command: sed -i.dist 's,universe$,universe multiverse,' /etc/apt/sources.list
+  when: ansible_os_family == "Debian"
+  tags:
+    - metrics
+
+- name: install api-tools
+  apt:
+    name: ec2-api-tools
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+  tags:
+    - metrics
+
+- name: install ami-tools
+  apt:
+    name: ec2-ami-tools
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+  tags:
+    - metrics
+
+# Required script for Cloudwatch
+- name: download ec2-metadata script
+  get_url:
+    url: "{{ aws_metadata_scripts_url }}"
+    dest: "{{ aws_metadata_scripts_path }}"
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - metrics
+
+- name: copy aws-scripts-mon folder to directory
+  copy:
+    src: "usr/local/aws-scripts-mon/"
+    dest: "{{ aws_monitor_scripts_path }}aws-scripts-mon/"
+    owner: root
+    group: root
+    mode: u=rwX,g=rX,o=rX
+    directory_mode: "u=rwX,g=rX,o=rX"
+  tags:
+    - metrics
+
+- name: make mon-get-instance-stats.pl executable
+  file:
+    path: "{{ aws_monitor_scripts_path }}aws-scripts-mon/mon-get-instance-stats.pl"
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - metrics
+
+- name: make mon-put-instance-data.pl executable
+  file:
+    path: "{{ aws_monitor_scripts_path }}aws-scripts-mon/mon-put-instance-data.pl"
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - metrics
+
+- name: add crontab entry to send metrics
+  cron:
+    name: "send AWS CloudWatch metrics"
+    minute: "*/5"
+    job: "{{ aws_monitor_scripts_path }}aws-scripts-mon/mon-put-instance-data.pl --disk-space-util --disk-path=/ --aggregated --from-cron --name"
+  when: ansible_os_family == "Debian"
+  tags:
+    - metrics
+
+- name: add crontab entry to send metrics
+  cron:
+    user: "ec2-user"
+    name: "send AWS CloudWatch metrics"
+    minute: "*/5"
+    job: "bash -l -c '{{ aws_monitor_scripts_path }}aws-scripts-mon/mon-put-instance-data.pl --disk-space-util --disk-path=/ --aggregated --from-cron --name'"
+  when: ansible_os_family == "RedHat"
+  tags:
+    - metrics
