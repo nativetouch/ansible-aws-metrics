@@ -68,7 +68,7 @@
   cron:
     name: "send AWS CloudWatch metrics"
     minute: "*/5"
-    job: "{{ aws_monitor_scripts_path }}aws-scripts-mon/mon-put-instance-data.pl --disk-space-util --disk-path=/ --aggregated --from-cron --name"
+    job: "{{ aws_monitor_scripts_path }}aws-scripts-mon/mon-put-instance-data.pl {{ metrics }} --disk-path=/ --aggregated --from-cron --name"
   when: ansible_os_family == "Debian"
   tags:
     - metrics
@@ -78,7 +78,7 @@
     user: "ec2-user"
     name: "send AWS CloudWatch metrics"
     minute: "*/5"
-    job: "bash -l -c '{{ aws_monitor_scripts_path }}aws-scripts-mon/mon-put-instance-data.pl --disk-space-util --disk-path=/ --aggregated --from-cron --name'"
+    job: "bash -l -c '{{ aws_monitor_scripts_path }}aws-scripts-mon/mon-put-instance-data.pl {{ metrics }} --disk-path=/ --aggregated --from-cron --name'"
   when: ansible_os_family == "RedHat"
   tags:
     - metrics

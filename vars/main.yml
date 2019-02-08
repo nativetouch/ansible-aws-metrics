@@ -17,3 +17,5 @@ aws_monitor_scripts_path: /usr/local/
 
 aws_metadata_scripts_path: /usr/bin/
 aws_metadata_scripts_url: https://s3.amazonaws.com/ec2metadata/ec2-metadata
+
+metrics: "--disk-space-util"
