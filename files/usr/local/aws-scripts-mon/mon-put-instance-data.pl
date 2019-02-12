@@ -42,7 +42,8 @@ Description of available options:
   --auto-scaling[=only]  Reports Auto Scaling metrics in addition to instance metrics.
                          If =only is specified, does not report individual instance metrics
 
-  --name        Adds the ec2 machine name as a dimension
+  --name                 Adds the ec2 machine name as a dimension
+  --ignore-filesystem    Does not add Filesystem as a dimension
 
   --mem-used-incl-cache-buff  Count memory that is cached and in buffers as used.
   --memory-units=UNITS        Specifies units for memory metrics.
@@ -145,6 +146,7 @@ my $parse_result = 1;
 my $parse_error = '';
 my $argv_size = @ARGV;
 my $machine_name;
+my $ignore_filesystem;
 {
   # Capture warnings from GetOptions
   local $SIG{__WARN__} = sub { $parse_error .= $_[0]; };
@@ -175,6 +177,7 @@ my $machine_name;
     'enable-compression' => \$enable_compression,
     'aws-iam-role:s' => \$aws_iam_role,
     'name'=>\$name,
+    'ignore-filesystem'=>\$ignore_filesystem,
     );
 
 }
@@ -470,7 +473,7 @@ sub add_metric
   my %dims = ();
   my %xdims = ();
   $xdims{'MountPath'} = $mount if $mount;
-  $xdims{'Filesystem'} = $filesystem if $filesystem;
+  $xdims{'Filesystem'} = $filesystem if $filesystem && !$ignore_filesystem;
 
   my $auto_scaling_only = defined($auto_scaling) && $auto_scaling == AGGREGATED_ONLY;
   my $aggregated_only = defined($aggregated) && $aggregated == AGGREGATED_ONLY;
